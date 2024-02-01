@@ -10,3 +10,7 @@ summary(model1)
 model2 <- lm(mpg ~ hp + I(hp^2), mtcars)
 summary(model2)
 plot(model2)
+
+# Regression with all variables
+model3 <- lm(mpg ~ ., mtcars)
+summary(model3)
