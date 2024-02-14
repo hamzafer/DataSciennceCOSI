@@ -35,6 +35,7 @@ calculate_poly <- function(polynomial_degree = 2) {
 
   fit_model_and_calculate_mse <- function(combination) {
     poly_terms <- lapply(combination, function(x) paste0("poly(", x, ", ", polynomial_degree, ")"))
+    # example: "hp ~ poly(mpg, 2)+poly(cyl, 2)"
     formula_str <- paste(target_var, "~", paste(poly_terms, collapse = "+"))
     formula <- as.formula(formula_str)
     model <- lm(formula, data = data)
