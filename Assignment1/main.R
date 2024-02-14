@@ -9,21 +9,41 @@ predictors <- c("mpg", "cyl", "disp", "drat", "wt", "qsec", "vs", "am", "gear", 
 n_vars <- 2
 combinations <- combn(predictors, n_vars, simplify = FALSE)
 
-fit_model_and_calculate_mse <- function(combination) {
-  formula_str <- paste(target_var, "~", paste(combination, collapse = "+"))
-  formula <- as.formula(formula_str)
-  model <- lm(formula, data = data)
-  mse <- mean((predict(model, data) - data[[target_var]])^2)
-  list(formula = formula_str, mse = mse)
+calculate <- function(sign = "+", intercept = FALSE) {
+
+  additive_fit_model_and_calculate_mse <- function(combination) {
+    formula_str <- paste(target_var, "~", paste(combination, collapse = sign))
+    if (intercept) {
+      formula_str <- paste0(formula_str, " - 1")
+    }
+    formula <- as.formula(formula_str)
+    model <- lm(formula, data = data)
+    mse <- mean((predict(model, data) - data[[target_var]])^2)
+    list(formula = formula_str, mse = mse)
+  }
+
+  results <- lapply(combinations, additive_fit_model_and_calculate_mse)
+
+  min_mse_index <- which.min(sapply(results, function(x) x$mse))
+  return(min_mse_model <- results[[min_mse_index]])
 }
 
-results <- lapply(combinations, fit_model_and_calculate_mse)
+min_mse_model_additive <- calculate("+")
+min_mse_model_non_additive <- calculate("*")
+min_mse_model_additive_intercept <- calculate("+", TRUE)
+min_mse_model_non_additive_intercept <- calculate("*", TRUE)
 
-min_mse_index <- which.min(sapply(results, function(x) x$mse))
-min_mse_model <- results[[min_mse_index]]
+cat("\nModel with the lowest MSE Additive:\n")
+cat(min_mse_model_additive$formula, "MSE:", min_mse_model_additive$mse, "\n")
 
-cat("\nModel with the lowest MSE:\n")
-cat(min_mse_model$formula, "MSE:", min_mse_model$mse, "\n")
+cat("\nModel with the lowest MSE Non Additive:\n")
+cat(min_mse_model_non_additive$formula, "MSE:", min_mse_model_non_additive$mse, "\n")
+
+cat("\nModel with the lowest MSE Additive with Intercept:\n")
+cat(min_mse_model_additive_intercept$formula, "MSE:", min_mse_model_additive_intercept$mse, "\n")
+
+cat("\nModel with the lowest MSE Non Additive with Intercept:\n")
+cat(min_mse_model_non_additive_intercept$formula, "MSE:", min_mse_model_non_additive_intercept$mse, "\n")
 
 # find the model with the lowest value
 #   Model with the lowest MSE:
