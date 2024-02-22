@@ -33,7 +33,7 @@ assessModel <- function(predictions, labels) {
   cat("______________\n")
 }
 
-knn_pred_3_numeric <- as.numeric(knn_pred_3) - 1 # Assuming your factors are "1" and "2"
+knn_pred_3_numeric <- as.numeric(knn_pred_3) - 1
 knn_pred_5_numeric <- as.numeric(knn_pred_5) - 1
 true_labels <- testData$default
 
