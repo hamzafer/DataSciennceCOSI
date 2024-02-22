@@ -82,4 +82,4 @@ min_mse_value <- min(mse_values)
 cat("\n***********\n Model with the lowest MSE:", min_mse_model_name, "with MSE:", min_mse_value, "\n")
 
 # find the model with the lowest value
-#   Model with the lowest MSE: Non_Additive with MSE: 373.8966
+#   Model with the lowest MSE: Non_Additive hp ~ cyl*carb with MSE: 373.8966

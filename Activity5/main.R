@@ -11,7 +11,6 @@ print(missing_values)
 # Create a copy of biopsy with missing values
 biopsy.missing <- biopsy
 selected <- sample(nrow(biopsy.missing), 5)
-biopsy.missing[selected, 'V6'] <- NA
 
 # Perform KNN imputation
 biopsy.filled <- knnImputation(biopsy.missing, k = 5)  # uses weighted average and scales by default
