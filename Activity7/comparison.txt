@@ -23,4 +23,5 @@ disp:
 This difference is minimal.
 
 carb:
-The most significant difference is observed in the standard error for carb, where the bootstrap method (4.64669) has a higher standard error than the original model output (3.29762). This difference suggests that the bootstrap method may capture additional variability in the carb coefficient that the original model's standard error estimation does not fully account for.
+The most significant difference is observed in the standard error for carb, where the bootstrap method (4.64669) has a higher standard error than the original model output (3.29762).
+This difference suggests that the bootstrap method may capture additional variability in the carb coefficient that the original model's standard error estimation does not fully account for.
