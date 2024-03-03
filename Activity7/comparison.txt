@@ -1,0 +1,26 @@
+Comparing the standard errors of the coefficients for the linear model lm(hp ~ disp + carb, data = mtcars):
+
+Original Model Output:
+
+Intercept: 11.61391
+disp: 0.04298
+carb: 3.29762
+
+
+Bootstrap Method:
+
+Intercept: 11.73048
+disp: 0.04614
+carb: 4.64669
+
+
+Comparison:
+
+Intercept:
+This difference is minimal.
+
+disp:
+This difference is minimal.
+
+carb:
+The most significant difference is observed in the standard error for carb, where the bootstrap method (4.64669) has a higher standard error than the original model output (3.29762). This difference suggests that the bootstrap method may capture additional variability in the carb coefficient that the original model's standard error estimation does not fully account for.
