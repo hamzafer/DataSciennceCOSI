@@ -55,3 +55,5 @@ for (pair_name in names(ovo_datasets)) {
 # Example to show the LDA classifier for the first pair:
 first_pair_name <- names(lda_classifiers)[1]
 lda_classifiers[[first_pair_name]]
+
+# Full approach explained in the explaination.md file

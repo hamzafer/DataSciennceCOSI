@@ -27,7 +27,18 @@
         - `testing_set`: Combined testing data for the current class pair.
 
 7. **Accessing the Data:**
-    - The subsets for any class pair can be accessed using `ovo_datasets[["Class1_vs_Class2"]]$subset_name`, where `Class1` and `Class2` are the names of the classes in the pair, and `subset_name` is either `training_set` or `testing_set`.
+    - The subsets for any class pair can be accessed using `ovo_datasets[["Class1_vs_Class2"]]$subset_name`,
+      where `Class1` and `Class2` are the names of the classes in the pair, and `subset_name` is either `training_set`
+      or `testing_set`.
+
+8. **Adjusting Factor Levels for LDA Training:**
+    - Before training LDA classifiers, we adjust the levels of the `type` factor in the training set to only include the
+      two classes involved in each classifier. This ensures that the LDA function correctly models the binary
+      classification for each class pair without any empty group warnings.
+
+9. **Train LDA Classifiers for Each Class Pair:**
+    - We train an LDA classifier for each pair of classes using the adjusted datasets. Each classifier is trained to
+      distinguish between the two classes in its pair.
 
 ### Example Usage:
 
@@ -36,3 +47,11 @@ To access the training samples for the first pair of classes, you would use:
 ```r
 first_pair_name <- names(ovo_datasets)[1]
 ovo_datasets[[first_pair_name]]$training_set
+```
+
+To access the trained LDA classifier for the first pair of classes, you would use:
+
+```r
+first_pair_name <- names(lda_classifiers)[1]
+lda_classifiers[[first_pair_name]]
+```
