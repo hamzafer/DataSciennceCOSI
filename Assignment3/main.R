@@ -42,6 +42,11 @@ for (pair in class_pairs) {
 lda_classifiers <- list()
 for (pair_name in names(ovo_datasets)) {
   dataset <- ovo_datasets[[pair_name]]
+
+  # Adjusting the levels of 'type' to match the current pair as it was throwing a warning
+  current_classes <- strsplit(pair_name, "_vs_")[[1]]
+  dataset$training_set$type <- factor(dataset$training_set$type, levels = current_classes)
+
   lda_classifier <- lda(type ~ ., data = dataset$training_set)
   lda_classifiers[[pair_name]] <- lda_classifier
 }
