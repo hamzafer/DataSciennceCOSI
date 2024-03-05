@@ -9,12 +9,14 @@ totalClasses <- nrow(table(classes))
 set.seed(123)
 ova_datasets <- list()
 
+training_percentage <- 0.7
+
 for (class in classes) {
   positive_samples <- fgl[fgl$type == class,]
   negative_samples <- fgl[fgl$type != class,]
 
-  training_indices_pos <- sample(1:nrow(positive_samples), size = 0.7 * nrow(positive_samples))
-  training_indices_neg <- sample(1:nrow(negative_samples), size = 0.7 * nrow(negative_samples))
+  training_indices_pos <- sample(1:nrow(positive_samples), size = training_percentage * nrow(positive_samples))
+  training_indices_neg <- sample(1:nrow(negative_samples), size = training_percentage * nrow(negative_samples))
 
   training_set_pos <- positive_samples[training_indices_pos,]
   training_set_neg <- negative_samples[training_indices_neg,]
