@@ -17,3 +17,8 @@ which(sum_obj$bic == min(sum_obj$bic))
 coef(regfit.full, 3)
 #(Intercept)          wt        qsec          am
 # 9.617781   -3.916504    1.225886    2.935837
+
+sorted <- sort(sum_obj$bic)
+indices <- sapply(sorted, function(x) which(sum_obj$bic == x))
+print(indices)
+# [1] 3 2 4 1 5 6 7
