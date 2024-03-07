@@ -28,8 +28,8 @@ row_means <- numeric(nrow(data))
 row_maxs <- numeric(nrow(data))
 
 for (i in 1:nrow(data)) {
-  row_means[i] <- mean(data[i, ])
-  row_maxs[i] <- max(data[i, ])
+  row_means[i] <- mean(data[i,])
+  row_maxs[i] <- max(data[i,])
 }
 
 print(row_means)

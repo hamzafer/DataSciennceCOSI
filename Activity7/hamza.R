@@ -16,9 +16,9 @@ custom_bootstrap <- function(data, n_bootstrap) {
   bootstrap_estimates <- matrix(NA, nrow = n_bootstrap, ncol = length(original_coefficients))
 
   for (i in 1:n_bootstrap) {
-    bootstrap_sample <- data[sample(nrow(data), replace = TRUE), ]
+    bootstrap_sample <- data[sample(nrow(data), replace = TRUE),]
     bootstrap_model <- lm(hp ~ disp + carb, data = bootstrap_sample)
-    bootstrap_estimates[i, ] <- coef(bootstrap_model)
+    bootstrap_estimates[i,] <- coef(bootstrap_model)
   }
 
   colnames(bootstrap_estimates) <- names(original_coefficients)

@@ -5,7 +5,7 @@ data.rows <- nrow(mtcars)
 data.cols <- ncol(mtcars)
 nSets <- data.cols - 1
 
-shuffled <- mtcars[sample(data.rows), ]
+shuffled <- mtcars[sample(data.rows),]
 
 # Create 10 equally sized folds
 folds <- cut(seq(1, data.rows), breaks = k, labels = FALSE)
@@ -18,15 +18,16 @@ make.prediction <- function(object, testData, nPredictors) {
   vars <- names(coefi)
   mat[, vars] %*% coefi
 }
-for(i in 1:k){
-  testIndexes <- which(folds==i, arr.ind=TRUE)
-  testData <- shuffled[testIndexes, ]
-  trainData <- shuffled[-testIndexes, ]
+
+for (i in 1:k) {
+  testIndexes <- which(folds == i, arr.ind = TRUE)
+  testData <- shuffled[testIndexes,]
+  trainData <- shuffled[-testIndexes,]
 
   # Best subsets using fold i
-  best.fit <- regsubsets(hp ~ ., data=trainData, nvmax=nSets)
+  best.fit <- regsubsets(hp ~ ., data = trainData, nvmax = nSets)
 
-  for(j in 1:nSets) {
+  for (j in 1:nSets) {
     prediction <- make.prediction(best.fit, testData, j)
     cv.errors[i, j] <- mean((testData$hp - prediction)^2)
   }

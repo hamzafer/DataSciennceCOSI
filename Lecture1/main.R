@@ -12,16 +12,16 @@ f <- data.frame(row.names = names, ages, goals)
 
 max(d$ages)
 max(f$goals)
-d[which(d$goals==max(d$goals)),]
+d[which(d$goals == max(d$goals)),]
 
-par(mfrow=c(2,2))
+par(mfrow = c(2, 2))
 plot(d$ages, d$goals)
-plot(d$ages, d$goals, type="l")
-plot(d$ages, d$goals, type="l", col="red")
-plot(d$ages, d$goals, type="l", col="red", lwd=3)
+plot(d$ages, d$goals, type = "l")
+plot(d$ages, d$goals, type = "l", col = "red")
+plot(d$ages, d$goals, type = "l", col = "red", lwd = 3)
 
-plot(1:10, 1:10, type="l", col="red", lwd=3)
-plot(1:10, 1:10, type="l", col="red", lwd=3, xlim=c(0, 20), ylim=c(0, 20))
+plot(1:10, 1:10, type = "l", col = "red", lwd = 3)
+plot(1:10, 1:10, type = "l", col = "red", lwd = 3, xlim = c(0, 20), ylim = c(0, 20))
 
 png("myplot.png")
 dev.off()
