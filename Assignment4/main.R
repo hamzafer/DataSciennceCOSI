@@ -27,6 +27,8 @@ for (i in 1:k) {
 # The train_sets and test_sets lists now contain the training and test sets for each fold
 # Example for the first fold:
 cat("Fold #1:\n")
+cat("Total Count: ", nrow(train_sets[[1]]) + nrow(test_sets[[1]]), "\n")
+
 cat("Training Set Data:\n")
 print(train_sets[[1]])
 cat("Training Set Count:\n")
@@ -36,5 +38,3 @@ cat("Test Set Data:\n")
 print(test_sets[[1]])
 cat("Test Set Count:\n")
 print(nrow(test_sets[[1]]))
-
-cat("Total Count: ", nrow(train_sets[[1]]) + nrow(test_sets[[1]]), "\n")
