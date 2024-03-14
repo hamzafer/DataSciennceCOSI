@@ -60,7 +60,7 @@ fpr_values <- model_assessment[[2]]
 cutoff_values <- model_assessment[[3]]
 
 # Calculating the distance of each ROC point to the top left corner (0,1)
-distances <- sqrt((1 - tpr_values)^2 + (fpr_values)^2)
+distances <- sqrt((0 - fpr_values)^2 + (1 - tpr_values)^2)
 min_distance_index <- which.min(distances)
 
 best_cutoff <- cutoff_values[min_distance_index]
