@@ -3,13 +3,18 @@ library(MASS)
 data(fgl)
 set.seed(123)
 
+# TODO: No transformation required for the test set.
+# TODO: Use a new colunm 'Rest' to store the rest of the classes
+# TODO: Predict the class with the highest probability
+
 classes <- unique(fgl$type)
 
 # Calculate total number of classes
 totalClasses <- nrow(table(classes))
 # For the OVO strategy, we will create a binary classifier for each pair of classes.
 # With 6 classes in this case, we have C(6, 2) = 6 * (6-1) / 2 = 15 binary classifiers.
-# For each unique pair of classes (i, j), where i ≠ j and i, j ∈ {1 ... K}, we create a binary classifier that distinguishes class i from class j.
+# For each unique pair of classes (i, j), where i ≠ j and i, j ∈ {1 ... K}
+# we create a binary classifier that distinguishes class i from class j.
 
 # Initialize list to store OVO datasets
 ovo_datasets <- list()

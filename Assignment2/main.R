@@ -6,6 +6,9 @@ totalClasses <- nrow(table(classes))
 # there are going to be 6 binary classifiers because there are 6 classes
 # k ∈ {1 . . . K}. For each k, we create a binary classifier that distinguishes class k from the other K − 1 classes.
 
+# TODO: No transformation required for the test set.
+# TODO: Need to group all the negative class samples in a new class
+
 set.seed(123)
 ova_datasets <- list()
 
