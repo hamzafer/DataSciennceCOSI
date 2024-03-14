@@ -38,7 +38,7 @@ asessModel <- function(adapted.pred, adapted.labels)
   plot(performance(pred, 'tpr', 'fpr'))
   #print(performance(pred,'tpr','fpr'))
   auc <- performance(pred, measure = "auc")
-  print(attr(auc, "y.values")[[1]])
+  print(paste("AUC:", attr(auc, "y.values")[[1]]))
   #TPR, FPR and cutoff values
   #print(performance(pred, measure = "tpr")@y.values[[1]])
   #print(performance(pred, measure = "fpr")@y.values[[1]])
@@ -52,3 +52,21 @@ asessModel <- function(adapted.pred, adapted.labels)
 
 ######
 
+# AUC = [1] 0.9940276
+model_assessment <- asessModel(adapted.pred, adapted.labels)
+
+tpr_values <- model_assessment[[1]]
+fpr_values <- model_assessment[[2]]
+cutoff_values <- model_assessment[[3]]
+
+# Calculating the distance of each ROC point to the top left corner (0,1)
+distances <- sqrt((1 - tpr_values)^2 + (fpr_values)^2)
+min_distance_index <- which.min(distances)
+
+best_cutoff <- cutoff_values[min_distance_index]
+best_tpr <- tpr_values[min_distance_index]
+best_fpr <- fpr_values[min_distance_index]
+
+print(paste("Best cutoff value is:", best_cutoff))
+print(paste("Corresponding TPR:", best_tpr))
+print(paste("Corresponding FPR:", best_fpr))
