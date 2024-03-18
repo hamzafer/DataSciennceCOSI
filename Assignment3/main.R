@@ -32,9 +32,6 @@ train_lda_pair <- function(pair, data, classes) {
   return(lda_model)
 }
 
-# Train an LDA model for each pair
-models <- lapply(class_pairs, train_lda_pair, data = fgl_data, classes = fgl_classes)
-
 # A simple voting function for classification
 predict_ovo <- function(models, new_sample, class_pairs) {
   # Initialize votes for each unique class, not pair
@@ -52,8 +49,38 @@ predict_ovo <- function(models, new_sample, class_pairs) {
   return(names(which.max(votes)))
 }
 
+# Train an LDA model for each pair
+models <- lapply(class_pairs, train_lda_pair, data = fgl_data, classes = fgl_classes)
+
 # Example: Predicting the class of the first sample
 # Note: This is a simplistic example. You should split your data into training and test sets.
 sample_prediction <- predict_ovo(models, fgl_data[1, , drop = FALSE], class_pairs)
 print(fgl_data[1, , drop = FALSE])
 print(sample_prediction)
+
+#
+# # Step 1: Split the data into training and testing sets
+# set.seed(123) # For reproducibility
+# total_samples <- nrow(fgl)
+# shuffled_indices <- sample(total_samples)
+# split_point <- round(total_samples * 0.8)
+#
+# training_indices <- shuffled_indices[1:split_point]
+# testing_indices <- shuffled_indices[(split_point + 1):total_samples]
+#
+# training_data <- fgl[training_indices, -ncol(fgl)]
+# training_classes <- fgl[training_indices, ncol(fgl)]
+# testing_data <- fgl[testing_indices, -ncol(fgl)]
+# testing_classes <- fgl[testing_indices, ncol(fgl)]
+#
+# # Re-train models on the training set
+# training_class_pairs <- combn(unique(training_classes), 2, simplify = FALSE)
+# models <- lapply(training_class_pairs, train_lda_pair, data = training_data, classes = training_classes)
+#
+# # Step 3: Evaluate on the testing set
+# predictions <- sapply(1:nrow(testing_data), function(i) predict_ovo(models, testing_data[i, , drop = FALSE], training_class_pairs))
+# correct_predictions <- sum(predictions == testing_classes)
+# accuracy <- correct_predictions / length(testing_classes)
+#
+# # Print the accuracy
+# print(paste("Accuracy:", accuracy))
