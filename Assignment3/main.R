@@ -1,65 +1,59 @@
 # Using the fgl dataset (MASS package), create an OVO classifier using LDA based binary classifiers.
 library(MASS)
 data(fgl)
-set.seed(123)
-
-# TODO: No transformation required for the test set.
-# TODO: Use a new colunm 'Rest' to store the rest of the classes
-# TODO: Predict the class with the highest probability
-
-classes <- unique(fgl$type)
+print(head(fgl))
 
 # Calculate total number of classes
+classes <- unique(fgl$type)
 totalClasses <- nrow(table(classes))
 # For the OVO strategy, we will create a binary classifier for each pair of classes.
 # With 6 classes in this case, we have C(6, 2) = 6 * (6-1) / 2 = 15 binary classifiers.
 # For each unique pair of classes (i, j), where i ≠ j and i, j ∈ {1 ... K}
 # we create a binary classifier that distinguishes class i from class j.
 
-# Initialize list to store OVO datasets
-ovo_datasets <- list()
+# Prepare the data
+fgl_data <- fgl[, -ncol(fgl)]  # Features
+fgl_classes <- fgl[, ncol(fgl)]  # Class labels
 
-# Generate all possible pairs of classes
-class_pairs <- combn(classes, 2, simplify = FALSE)
+# Generate all pairs of classes
+class_pairs <- combn(unique(fgl_classes), 2, simplify = FALSE)
 
-training_percentage <- 0.7
+train_lda_pair <- function(pair, data, classes) {
+  # Filter data for the current pair
+  indices <- which(classes %in% pair)
+  pair_data <- data[indices,]
+  pair_classes <- classes[indices]
 
-for (pair in class_pairs) {
-  class1_samples <- fgl[fgl$type == pair[1],]
-  class2_samples <- fgl[fgl$type == pair[2],]
+  # Convert 'pair_classes' into a factor with levels explicitly set to the current pair to ensure that the LDA function correctly interprets the classes and dont throw a warning
+  pair_classes_factor <- factor(pair_classes, levels = pair)
 
-  training_indices_class1 <- sample(1:nrow(class1_samples), size = training_percentage * nrow(class1_samples))
-  training_indices_class2 <- sample(1:nrow(class2_samples), size = training_percentage * nrow(class2_samples))
-
-  training_set_class1 <- class1_samples[training_indices_class1,]
-  training_set_class2 <- class2_samples[training_indices_class2,]
-  testing_set_class1 <- class1_samples[-training_indices_class1,]
-  testing_set_class2 <- class2_samples[-training_indices_class2,]
-
-  training_set <- rbind(training_set_class1, training_set_class2)
-  testing_set <- rbind(testing_set_class1, testing_set_class2)
-
-  pair_name <- paste(pair, collapse = "_vs_")
-  ovo_datasets[[pair_name]] <- list(training_set = training_set, testing_set = testing_set)
+  # Train LDA model using the filtered data and the factorized class labels
+  lda_model <- lda(pair_data, grouping = pair_classes_factor)
+  return(lda_model)
 }
 
-# Now the ovo_datasets list contains the datasets required for OVO scheme
-# Moving onto Training LDA classifiers for each class pair
-lda_classifiers <- list()
-for (pair_name in names(ovo_datasets)) {
-  dataset <- ovo_datasets[[pair_name]]
+# Train an LDA model for each pair
+models <- lapply(class_pairs, train_lda_pair, data = fgl_data, classes = fgl_classes)
 
-  # Adjusting the levels of 'type' to match the current pair as it was throwing a warning
-  current_classes <- strsplit(pair_name, "_vs_")[[1]]
-  dataset$training_set$type <- factor(dataset$training_set$type, levels = current_classes)
+# A simple voting function for classification
+predict_ovo <- function(models, new_sample, class_pairs) {
+  # Initialize votes for each unique class, not pair
+  unique_classes <- unique(unlist(class_pairs))
+  votes <- numeric(length(unique_classes))
+  names(votes) <- unique_classes
 
-  lda_classifier <- lda(type ~ ., data = dataset$training_set)
-  lda_classifiers[[pair_name]] <- lda_classifier
+  for (i in seq_along(models)) {
+    prediction <- predict(models[[i]], new_sample)$class
+    # Increment votes for the predicted class
+    votes[prediction] <- votes[prediction] + 1
+  }
+
+  # Return the class with the highest vote count
+  return(names(which.max(votes)))
 }
 
-# At this point, `lda_classifiers` contains the trained LDA models for each class pair
-# Example to show the LDA classifier for the first pair:
-first_pair_name <- names(lda_classifiers)[1]
-lda_classifiers[[first_pair_name]]
-
-# Full approach explained in the explaination.md file
+# Example: Predicting the class of the first sample
+# Note: This is a simplistic example. You should split your data into training and test sets.
+sample_prediction <- predict_ovo(models, fgl_data[1, , drop = FALSE], class_pairs)
+print(fgl_data[1, , drop = FALSE])
+print(sample_prediction)
