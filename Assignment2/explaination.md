@@ -2,37 +2,31 @@
 
 ### Steps Followed:
 
-1. **Load Dataset and Identify Classes:**
-    - The `fgl` dataset is loaded, and the unique classes (types of glass) are identified.
+1. **Initialize Dataset Storage:**
+    - An empty list named `ova_datasets` is initialized. This list is used to store the combined training dataset for
+      each class, where each dataset includes positive samples from the target class and negative samples from all other
+      classes, labeled as "Rest".
 
-2. **Set Seed for Reproducibility:**
-    - `set.seed(123)` ensures that our random operations can be replicated.
+2. **Combine Data for Each Class:**
+    - For each class identified in the dataset (`classes`)
+        - Positive samples (samples belonging to the current class) are identified and kept with their original class
+          label.
+        - Negative samples (samples not belonging to the current class) are also identified. These samples are then
+          labeled with a new, unified class label, "Rest", to distinguish them from the positive samples.
+        - **Adjust Factor Levels for Class Label:** After combining, adjust the levels of the `type` column to reflect
+          the new labeling 'Rest'.
+        - Positive and negative samples are combined into a single dataset for each class. This combined dataset is
+          ready for use in training a binary classifier, following the One-vs-All (OVA) strategy.
 
-3. **Initialize Dataset Storage:**
-    - An empty list `ova_datasets` is created to store the subsets for each class.
+3. **Store Combined Datasets in List:**
+    - The combined dataset for each class is stored in the `ova_datasets` list using `rbind` with the class name as the
+      key.
 
-4. **Split Data for Each Class:**
-    - k ∈ {1 . . . K}. For each k, we create a binary classifier that distinguishes class k from the other K − 1
-      classes.
-    - For each class in `classes`, we:
-        - Identify `positive_samples` (samples of the current class).
-        - Identify `negative_samples` (samples of all other classes).
-        - Randomly split the positive and negative samples into training (70%) and testing (30%) sets.
+### Accessing the Data:
 
-5. **Store Subsets in List:**
-    - For each class, we store four subsets in `ova_datasets`:
-        - `training_set_pos`: Training data of the current class.
-        - `training_set_neg`: Training data of all other classes.
-        - `testing_set_pos`: Testing data of the current class.
-        - `testing_set_neg`: Testing data of all other classes.
-
-6. **Accessing the Data:**
-    - The subsets for any class can be accessed using `ova_datasets[["ClassName"]]$subset_name`, where `ClassName` is
-      the name of the class and `subset_name` is one of the four subsets.
-
-### Example Usage:
-
-To access the positive training samples for the class "WinFol", we use:
+- To access the combined training dataset for any specific class, you can refer to the `ova_datasets` list using the
+  class name as the key. For example, to access the combined training data for the "WinF" class, use the following
+  command:
 
 ```r
-ova_datasets[["WinF"]]$training_set_pos
+combined_training_data_winF <- ova_datasets[["WinF"]]
