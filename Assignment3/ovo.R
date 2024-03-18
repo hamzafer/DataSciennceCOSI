@@ -41,7 +41,7 @@ train <- sample(nrow(dataset), nrow(dataset) / 2)
 train.set <- dataset[train,]
 test.set <- dataset[-train,]
 response <- "type"
-formula <- as.formula(paste(response, "~ .", sep = ""))
+formula <- as.formula(paste0(response, "~ ."))
 
 col <- which(colnames(dataset) == response)
 k <- length(levels(dataset[, col]))
@@ -58,6 +58,17 @@ for (i in 1:(k - 1)) {
 
     local.train.dataset <- mySelectClasses(train.set, class1, class2, response)
 
+    # Identify and remove constant variables within groups
+    vars_to_remove <- sapply(local.train.dataset[, -col], function(x) length(unique(x)) == 1)
+    if (any(vars_to_remove)) {
+      local.train.dataset <- local.train.dataset[, !vars_to_remove]
+      cat("Removed constant variables for group comparison:", class1, "vs", class2, "\n")
+    }
+
+    # Update formula if variables were removed
+    updated_formula <- as.formula(paste0(response, "~ ."))
+
+    model <- lda(updated_formula, data = local.train.dataset)
     model <- lda(formula, data = local.train.dataset)
     predictions[, ovo.model] <- predict(model, test.set)$class
     ovo.model <- ovo.model + 1
@@ -67,7 +78,7 @@ for (i in 1:(k - 1)) {
 result <- rep(dataset[1, col], nrow(test.set))
 
 # Get majority vote
-for (i in 1:nrow(test.set)) {
+for (i in seq_len(nrow(test.set))) {
   result[i] <- names(sort(table(predictions[i,]), decreasing = TRUE))[1]
 }
 
@@ -76,4 +87,3 @@ print(t)
 
 accuracy <- sum(diag(t)) / sum(t)
 print(paste("Accuracy:", accuracy))
-
