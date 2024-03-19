@@ -48,6 +48,7 @@ selectAndBalanceClasses <- function(dataset, class1, class2, responseVariable) {
   return(balancedDataset)
 }
 
+# Prepare the data
 set.seed(2)
 originalDataset <- fgl
 trainingSampleIndices <- sample(nrow(originalDataset), nrow(originalDataset) / 2)
@@ -81,6 +82,7 @@ for (i in 1:(numClasses - 1)) {
       cat("Removed constant variables for group comparison:", class1Name, "vs", class2Name, "\n")
     }
 
+    # Train the LDA model
     model <- lda(responseVariableFormula, data = balancedTrainingDataset)
     predictionsMatrix[, comparisonModelIndex] <- predict(model, testingDataset)$class
     comparisonModelIndex <- comparisonModelIndex + 1
