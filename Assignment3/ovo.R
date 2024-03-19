@@ -1,89 +1,106 @@
+# Using the fgl dataset (MASS package), create an OVO classifier using LDA based binary classifiers.
 library(MASS)
 data(fgl)
 
-myROS <- function(dataset, size) {
-  new_samples <- vector()
+# For the OVO strategy, we will create a binary classifier for each pair of classes.
+# With 6 classes in this case, we have C(6, 2) = 6 * (6-1) / 2 = 15 binary classifiers.
+# For each unique pair of classes (i, j), where i ≠ j and i, j ∈ {1 ... K}
+# we create a binary classifier that distinguishes class i from class j.
 
-  if (nrow(dataset) < size) {
-    new_samples <- sample(nrow(dataset), size - nrow(dataset), replace = TRUE)
+# Function to perform Random Over Sampling
+# This function takes a dataset and a target size, and adds samples to the dataset if it's smaller than the target size.
+randomOverSampling <- function(dataset, targetSize) {
+  additionalSamples <- vector()
+
+  # Check if the dataset needs more samples to reach the target size
+  if (nrow(dataset) < targetSize) {
+    additionalSamples <- sample(nrow(dataset), targetSize - nrow(dataset), replace = TRUE)
   }
 
-  new_dataset <- rbind(dataset, dataset[new_samples,])
+  # Append the additional samples to the original dataset
+  augmentedDataset <- rbind(dataset, dataset[additionalSamples,])
 
-  return(new_dataset)
+  return(augmentedDataset)
 }
 
-mySelectClasses <- function(dataset, class1, class2, response) {
-  col <- which(colnames(dataset) == response)
-  samples.class1 <- dataset[dataset[, col] == class1,]
-  samples.class2 <- dataset[dataset[, col] == class2,]
+# Function to select samples from two classes and balance them
+selectAndBalanceClasses <- function(dataset, class1, class2, responseVariable) {
+  responseColumnIndex <- which(colnames(dataset) == responseVariable)
+  samplesOfClass1 <- dataset[dataset[, responseColumnIndex] == class1,]
+  samplesOfClass2 <- dataset[dataset[, responseColumnIndex] == class2,]
 
-  if (nrow(samples.class1) > nrow(samples.class2)) {
-    majority <- samples.class1
-    minority <- samples.class2
+  # Determine the majority and minority classes
+  if (nrow(samplesOfClass1) > nrow(samplesOfClass2)) {
+    majorityClassSamples <- samplesOfClass1
+    minorityClassSamples <- samplesOfClass2
   } else {
-    majority <- samples.class2
-    minority <- samples.class1
+    majorityClassSamples <- samplesOfClass2
+    minorityClassSamples <- samplesOfClass1
   }
 
-  minority <- myROS(minority, nrow(majority))
-  result <- rbind(majority, minority)
+  # Balance the minority class to have the same number of samples as the majority class
+  balancedMinorityClassSamples <- randomOverSampling(minorityClassSamples, nrow(majorityClassSamples))
+  balancedDataset <- rbind(majorityClassSamples, balancedMinorityClassSamples)
 
-  # Restrict the levels
-  result[, col] <- factor(result[, col], levels = c(class1, class2))
+  # Ensure the response variable only has the levels of interest
+  balancedDataset[, responseColumnIndex] <- factor(balancedDataset[, responseColumnIndex], levels = c(class1, class2))
 
-  return(result)
+  return(balancedDataset)
 }
 
 set.seed(2)
-dataset <- fgl
-train <- sample(nrow(dataset), nrow(dataset) / 2)
-train.set <- dataset[train,]
-test.set <- dataset[-train,]
-response <- "type"
-formula <- as.formula(paste0(response, "~ ."))
+originalDataset <- fgl
+trainingSampleIndices <- sample(nrow(originalDataset), nrow(originalDataset) / 2)
+trainingDataset <- originalDataset[trainingSampleIndices,]
+testingDataset <- originalDataset[-trainingSampleIndices,]
+responseVariableName <- "type"
+responseVariableFormula <- as.formula(paste0(responseVariableName, "~ ."))
 
-col <- which(colnames(dataset) == response)
-k <- length(levels(dataset[, col]))
+# Identify the response variable column and the number of levels (classes)
+responseColumnIndex <- which(colnames(originalDataset) == responseVariableName)
+numClasses <- length(levels(originalDataset[, responseColumnIndex]))
 
-predictions <- rep(dataset[1, col], nrow(test.set) * k * (k - 1) / 2)
-dim(predictions) <- c(nrow(test.set), k * (k - 1) / 2)
+# Initialize a vector to hold predictions for One-Versus-One comparisons
+predictionsMatrix <- rep(originalDataset[1, responseColumnIndex], nrow(testingDataset) *
+  numClasses *
+  (numClasses - 1) / 2)
+dim(predictionsMatrix) <- c(nrow(testingDataset), numClasses * (numClasses - 1) / 2)
 
-ovo.model <- 1
+comparisonModelIndex <- 1
 
-for (i in 1:(k - 1)) {
-  for (j in (i + 1):k) {
-    class1 <- levels(train.set[, col])[i]
-    class2 <- levels(train.set[, col])[j]
+# Perform One-Versus-One class comparisons
+for (i in 1:(numClasses - 1)) {
+  for (j in (i + 1):numClasses) {
+    class1Name <- levels(trainingDataset[, responseColumnIndex])[i]
+    class2Name <- levels(trainingDataset[, responseColumnIndex])[j]
 
-    local.train.dataset <- mySelectClasses(train.set, class1, class2, response)
+    balancedTrainingDataset <- selectAndBalanceClasses(trainingDataset, class1Name, class2Name, responseVariableName)
 
-    # Identify and remove constant variables within groups
-    vars_to_remove <- sapply(local.train.dataset[, -col], function(x) length(unique(x)) == 1)
-    if (any(vars_to_remove)) {
-      local.train.dataset <- local.train.dataset[, !vars_to_remove]
-      cat("Removed constant variables for group comparison:", class1, "vs", class2, "\n")
+    # Remove constant variables within groups to avoid singularities - in our case it was variable number 8
+    constantVariables <- sapply(balancedTrainingDataset[, -responseColumnIndex], function(x) length(unique(x)) == 1)
+    if (any(constantVariables)) {
+      balancedTrainingDataset <- balancedTrainingDataset[, !constantVariables]
+      cat("Removed constant variables for group comparison:", class1Name, "vs", class2Name, "\n")
     }
 
-    # Update formula if variables were removed
-    updated_formula <- as.formula(paste0(response, "~ ."))
-
-    model <- lda(updated_formula, data = local.train.dataset)
-    model <- lda(formula, data = local.train.dataset)
-    predictions[, ovo.model] <- predict(model, test.set)$class
-    ovo.model <- ovo.model + 1
+    model <- lda(responseVariableFormula, data = balancedTrainingDataset)
+    predictionsMatrix[, comparisonModelIndex] <- predict(model, testingDataset)$class
+    comparisonModelIndex <- comparisonModelIndex + 1
   }
 }
 
-result <- rep(dataset[1, col], nrow(test.set))
+# Determine the most frequently predicted class for each test sample
+finalPredictions <- rep(originalDataset[1, responseColumnIndex], nrow(testingDataset))
 
-# Get majority vote
-for (i in seq_len(nrow(test.set))) {
-  result[i] <- names(sort(table(predictions[i,]), decreasing = TRUE))[1]
+for (i in seq_len(nrow(testingDataset))) {
+  finalPredictions[i] <- names(sort(table(predictionsMatrix[i,]), decreasing = TRUE))[1]
 }
 
-t <- table(result, test.set[, col])
-print(t)
+# Calculate and print the confusion matrix and accuracy
+confusionMatrix <- table(finalPredictions, testingDataset[, responseColumnIndex])
+print(confusionMatrix)
 
-accuracy <- sum(diag(t)) / sum(t)
+accuracy <- sum(diag(confusionMatrix)) / sum(confusionMatrix)
 print(paste("Accuracy:", accuracy))
+
+# [1] "Accuracy: 0.635514018691589"

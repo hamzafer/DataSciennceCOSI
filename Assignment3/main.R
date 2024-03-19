@@ -1,3 +1,5 @@
+# Old code
+
 # Using the fgl dataset (MASS package), create an OVO classifier using LDA based binary classifiers.
 library(MASS)
 data(fgl)
