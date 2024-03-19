@@ -61,9 +61,7 @@ responseColumnIndex <- which(colnames(originalDataset) == responseVariableName)
 numClasses <- length(levels(originalDataset[, responseColumnIndex]))
 
 # Initialize a vector to hold predictions for One-Versus-One comparisons
-predictionsMatrix <- rep(originalDataset[1, responseColumnIndex], nrow(testingDataset) *
-  numClasses *
-  (numClasses - 1) / 2)
+predictionsMatrix <- rep(originalDataset[1, responseColumnIndex], nrow(testingDataset) * numClasses * (numClasses - 1) / 2)
 dim(predictionsMatrix) <- c(nrow(testingDataset), numClasses * (numClasses - 1) / 2)
 
 comparisonModelIndex <- 1

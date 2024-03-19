@@ -3,55 +3,38 @@
 ### Steps Followed:
 
 1. **Load Dataset and Identify Classes:**
-    - The `fgl` dataset is loaded, and the unique classes (types of glass) are identified.
+    - Load the `fgl` dataset to create a One-vs-One (OVO) classifier using Linear Discriminant Analysis (LDA) for
+      binary classification.
 
 2. **Set Seed for Reproducibility:**
-    - `set.seed(123)` ensures that our random operations can be replicated.
+    - `set.seed(2)` is used to ensure the random sampling is reproducible.
 
-3. **Initialize Dataset Storage:**
-    - An empty list `ovo_datasets` is created to store the training and testing sets for each pair of classes.
+3. **Prepare Training and Test Sets:**
+    - The dataset is split into two subsets: a training set and a test set, each containing half of the dataset.
 
-4. **Generate Class Pairs:**
-    - With 6 classes in the dataset, we create C(6, 2) = 15 unique classifiers.
-    - We use `combn` to generate all possible pairs of classes.
+4. **Identify Unique Class Labels:**
+    - Determine the unique classes in the dataset and the number of classes `k`.
 
-5. **Split Data for Each Class Pair:**
-    - For each pair of classes (i, j), we:
-        - Identify samples from both classes.
-        - Randomly split the samples from each class into training (70%) and testing (30%) sets.
-        - This is variable in `training_percentage` in code
+5. **Initialize Predictions Storage:**
+    - A matrix `predictions` is initialized to store the prediction results for the test set.
 
-6. **Store Subsets in List:**
-    - For each class pair, we combine their respective training and testing samples and store them in `ovo_datasets`:
-        - `training_set`: Combined training data for the current class pair.
-        - `testing_set`: Combined testing data for the current class pair.
+6. **Perform OVO Binary Classification:**
+    - Nested loops iterate over all pairs of classes. For each pair, the function `mySelectClasses` is called to filter
+      the training set for the two classes.
+    - An LDA model is trained for each class pair, and predictions are made for the test set.
 
-7. **Accessing the Data:**
-    - The subsets for any class pair can be accessed using `ovo_datasets[["Class1_vs_Class2"]]$subset_name`,
-      where `Class1` and `Class2` are the names of the classes in the pair, and `subset_name` is either `training_set`
-      or `testing_set`.
+7. **Majority Voting:**
+    - A majority vote is applied across all binary classifiers' predictions to determine the final class for each sample
+      in the test set.
 
-8. **Adjusting Factor Levels for LDA Training:**
-    - Before training LDA classifiers, we adjust the levels of the `type` factor in the training set to only include the
-      two classes involved in each classifier. This ensures that the LDA function correctly models the binary
-      classification for each class pair without any empty group warnings.
-
-9. **Train LDA Classifiers for Each Class Pair:**
-    - We train an LDA classifier for each pair of classes using the adjusted datasets. Each classifier is trained to
-      distinguish between the two classes in its pair.
+8. **Create Confusion Matrix:**
+    - A confusion matrix `t` is generated to compare the OVO classifier's predictions with the actual class labels.
 
 ### Example Usage:
 
-To access the training samples for the first pair of classes, you would use:
+To access the LDA model's predictions for the first pair of classes, you would use:
 
 ```r
-first_pair_name <- names(ovo_datasets)[1]
-ovo_datasets[[first_pair_name]]$training_set
-```
-
-To access the trained LDA classifier for the first pair of classes, you would use:
-
-```r
-first_pair_name <- names(lda_classifiers)[1]
-lda_classifiers[[first_pair_name]]
-```
+ovo_predictions <- predictions[,1]
+actual_classes <- test.set[, "type"]
+confusion_matrix <- table(ovo_predictions, actual_classes)
