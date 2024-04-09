@@ -42,3 +42,12 @@ summary(bestmod)
 accuracy <- calculate_accuracy(bestmod, dat)
 print(accuracy)
 
+# Evaluate on test set
+xtest <- matrix(rnorm(20*2), ncol=2)
+ytest <- sample(c(-1, 1), 20, rep=TRUE)
+xtest[ytest==1,] <- xtest[ytest==1,] + 1
+testdat <- data.frame(x = xtest, y = as.factor(ytest))
+
+# Predictions with the best model
+ypred <- predict(bestmod, testdat)
+table(predict = ypred, truth = testdat$y)
