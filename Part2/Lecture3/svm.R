@@ -15,20 +15,30 @@ plot(svmfit, dat)
 cat("Support vectors", svmfit$index)
 summary(svmfit)
 
-# Predict using the SVM model
-predictions <- predict(svmfit, dat)
+calculate_accuracy <- function(svm_model, data) {
+  # Predict using the SVM model
+  predictions <- predict(svm_model, data)
+  # Actual labels
+  actual_labels <- data$y
+  # Calculate the number of correct predictions
+  correct_predictions <- sum(predictions == actual_labels)
+  # Calculate the total number of predictions
+  total_predictions <- length(actual_labels)
+  # Calculate accuracy
+  accuracy <- correct_predictions / total_predictions
+  # Return accuracy as a percentage
+  return(accuracy * 100)
+}
 
-# Actual labels
-actual_labels <- dat$y
+accuracy <- calculate_accuracy(svmfit, dat)
+print(accuracy)
 
-# Calculate the number of correct predictions
-correct_predictions <- sum(predictions == actual_labels)
+# e1071 automatic tuning
+tune.out <- tune(svm, y ~ ., data = dat, kernel = "linear", ranges=
+                 list(cost=c(0.001, 0.01, 0.1, 1, 5, 10, 100)))
+bestmod <- tune.out$best.model
+summary(bestmod)
 
-# Calculate the total number of predictions
-total_predictions <- length(actual_labels)
+accuracy <- calculate_accuracy(bestmod, dat)
+print(accuracy)
 
-# Calculate accuracy
-accuracy <- correct_predictions / total_predictions
-
-# Print accuracy
-print(accuracy * 100)
