@@ -10,7 +10,7 @@ plot(x, col = (3 - y))
 # Create data.frame with factor class attribute
 dat <- data.frame(x = x, y = as.factor(y))
 # C is cost
-svmfit <- svm(y ~ ., data = dat, kernel = "linear", cost = 10, scale = FALSE)
+svmfit <- svm(y ~ ., data = dat, kernel = "linear", cost = 0.10, scale = FALSE)
 plot(svmfit, dat)
 cat("Support vectors", svmfit$index)
 summary(svmfit)
