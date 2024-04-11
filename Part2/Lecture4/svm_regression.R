@@ -29,3 +29,4 @@ print(rmse)
 # Find some other kernels
 # Specilized kernels
 # Kernels for images
+# KernLab package - Spriral data
