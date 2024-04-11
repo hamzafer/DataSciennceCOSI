@@ -27,3 +27,5 @@ print(rmse)
 # Automatic Regression with SVM
 # Compare with Random Forest
 # Find some other kernels
+# Specilized kernels
+# Kernels for images
