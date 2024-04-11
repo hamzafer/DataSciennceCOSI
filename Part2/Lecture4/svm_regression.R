@@ -26,3 +26,4 @@ print(rmse)
 
 # Automatic Regression with SVM
 # Compare with Random Forest
+# Find some other kernels
