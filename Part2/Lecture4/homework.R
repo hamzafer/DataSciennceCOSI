@@ -1,4 +1,5 @@
 library(kernlab)
+set.seed(1)
 
 # Function to generate spiral data
 generate_spiral <- function(points, noise = 0.2) {
@@ -33,3 +34,10 @@ grid_points$class <- predict(svm_model, grid_points)
 
 # Visualization
 plot(grid_points$polar_radius, grid_points$polar_angle, col = grid_points$class, pch = 20, cex = 0.5)
+
+# Calculate accuracy
+predictions <- predict(svm_model, newdata = data)
+correct_predictions <- sum(predictions == data$class)
+total_predictions <- nrow(data)
+accuracy <- correct_predictions / total_predictions
+cat("\nAccuracy:", accuracy*100, "%")
