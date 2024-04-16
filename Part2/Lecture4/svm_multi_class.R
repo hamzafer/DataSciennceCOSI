@@ -34,3 +34,12 @@ accuracy <- calculate_accuracy(svmi, iris)
 cat("radial ::", accuracy)
 
 # Automatic OVO or OVA by svm - check which one it uses?
+
+# Example with sigmoid kernel
+
+svmi <- svm(Species ~ ., data = iris, kernel = "sigmoid", cost = 10)
+svmi_predict <- predict(svmi, data = iris, type = "class")
+table(svmi_predict, iris$Species)
+
+accuracy <- calculate_accuracy(svmi, iris)
+cat("sigmoid ::", accuracy)
