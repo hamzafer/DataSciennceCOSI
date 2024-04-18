@@ -16,6 +16,8 @@ best_rmse <- Inf
 
 # Try different sizes of the neural network
 sizes <- c(1, 2, 3, 5, 10, 50, 60)
+# the error is getting better till 50 and then it is getting worse (overfitting)
+# the best size is 50
 for (size in sizes) {
   nn.boston <- nnet(medv ~ ., data = Boston, subset = train, size = size, linout = TRUE, trace = FALSE)
 
