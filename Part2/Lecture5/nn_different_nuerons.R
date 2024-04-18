@@ -15,7 +15,7 @@ best_size <- NA
 best_rmse <- Inf
 
 # Try different sizes of the neural network
-sizes <- c(1, 2, 3, 5, 10, 50)
+sizes <- c(1, 2, 3, 5, 10, 50, 60)
 for (size in sizes) {
   nn.boston <- nnet(medv ~ ., data = Boston, subset = train, size = size, linout = TRUE, trace = FALSE)
 
