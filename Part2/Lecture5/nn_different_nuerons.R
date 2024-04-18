@@ -38,3 +38,5 @@ for (size in sizes) {
 
 # Print the best size and corresponding RMSE
 cat("Best size:", best_size, "with RMSE:", best_rmse, "\n")
+
+# Compare the other datasets using nnet and compare the results
