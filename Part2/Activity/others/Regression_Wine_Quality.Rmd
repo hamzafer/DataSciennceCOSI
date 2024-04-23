@@ -1,0 +1,94 @@
+---
+title: "Regression_Wine_Quality"
+author: "Anna"
+date: "2024-04-23"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+In this document we will work with Wine Quality dataset to compare different methods for Regression problem.
+
+## Libraries
+
+```{r}
+library(caret)
+library(tree)
+```
+
+### Alcohol
+
+## Load Data
+
+```{r}
+# Load data
+data <- read.csv("winequality-red.csv", sep = ";")
+```
+
+## Preprocess Data
+
+```{r}
+# Summary of missing values
+summary(is.na(data))
+
+# Apply a function to check for any missing values in each column
+sapply(data, function(x) any(is.na(x)))
+
+# Check for any duplicated rows
+any(duplicated(data))
+
+# Distribution of the 'alcohol' variable
+table(data$alcohol)
+```
+
+## Data Cleaning
+
+```{r}
+# Remove duplicated rows if any
+data <- data[!duplicated(data), ]
+
+# Handling missing values - assuming minimal missing values, else consider imputation or removal
+data <- na.omit(data)
+```
+
+## Split Data into Training and Test Sets
+
+```{r}
+set.seed(2)
+train_indices <- sample(nrow(data), nrow(data)/2)
+train <- data[train_indices,]
+test <- data[-train_indices,]
+```
+
+## Decision Tree Model
+
+```{r}
+# Fit a decision tree model to predict 'quality' based on all other variables
+tree_model <- tree(alcohol ~ ., data = train) 
+
+# Plot the pruned tree
+plot(tree_model)
+text(tree_model)
+
+# Simplify the tree by pruning, keeping the best 3 nodes
+smodel <- prune.tree(tree_model, best = 5)
+
+# Plot the pruned tree
+plot(smodel)
+text(smodel)
+
+# Display the pruned tree model
+smodel
+
+# Predict on test set
+tree_predictions <- predict(smodel, test)
+
+# Calculate RMSE
+tree_rmse <- sqrt(mean((tree_predictions - test$alcohol)^2))
+tree_mrae <- mean(abs((test$alcohol - tree_predictions)/test$alcohol))
+print(paste("Decision Tree RMSE:", tree_rmse))
+print(paste("Decision Tree MRAE:", tree_mrae))
+```
+
