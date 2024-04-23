@@ -18,18 +18,28 @@ test_indices <- setdiff(1:nrow(wine_data), train_indices)
 # Train the neural network
 nn_model <- nnet(quality ~ ., data = wine_data, subset = train_indices, size = 5, linout = TRUE)
 
-# Make predictions on the training set
-nn_predict_train <- predict(nn_model, wine_data[train_indices,])
+# Ensure that predictions are numeric and that actual values are correctly extracted as numeric vectors
+nn_predict_train <- as.numeric(predict(nn_model, wine_data[train_indices,]))
+actual_values_train <- as.numeric(wine_data[train_indices,][["quality"]])
 
-# Calculate Root Mean Squared Error (RMSE) for training set
-rmse_train <- sqrt(mean((nn_predict_train - wine_data[train_indices, "quality"])^2))
+# Calculate the differences as a numeric vector
+mean_value <- nn_predict_train - actual_values_train
 
-# Make predictions on the testing set
-nn_predict_test <- predict(nn_model, newdata = wine_data[test_indices,])
+# Calculate Root Mean Squared Error (RMSE) for the training set
+rmse_train <- sqrt(mean(mean_value^2))
 
-# Calculate RMSE for testing set
-rmse_test <- sqrt(mean((nn_predict_test - wine_data[test_indices, "quality"])^2))
+# Print the RMSE
+cat("Root Mean Squared Error on training set:", rmse_train, "\n")
 
-# Print mean squared errors
-cat("Mean squared error on training set:", rmse_train, "\n")
-cat("Mean squared error on test set:", rmse_test, "\n")
+# Repeat for the testing set
+nn_predict_test <- as.numeric(predict(nn_model, newdata = wine_data[test_indices,]))
+actual_values_test <- as.numeric(wine_data[test_indices,][["quality"]])
+
+# Calculate the differences for the test set
+mean_value_test <- nn_predict_test - actual_values_test
+
+# Calculate RMSE for the testing set
+rmse_test <- sqrt(mean(mean_value_test^2))
+
+# Print the RMSE
+cat("Root Mean Squared Error on testing set:", rmse_test, "\n")
