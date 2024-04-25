@@ -15,7 +15,7 @@ breast_cancer.test.diagnosis <- breast_cancer.test[, "diagnosis"]
 
 mtry <- sqrt(ncol(breast_cancer) - 1)
 # Creating the decision tree model
-breast_cancer.tree <- randomForest(diagnosis ~ ., breast_cancer, subset = breast_cancer.train, mtry=mtry, importance=TRUE)
+breast_cancer.tree <- randomForest(diagnosis ~ ., breast_cancer, subset = breast_cancer.train, mtry = mtry, importance = TRUE)
 
 # Predicting diagnosis for the test set
 tree.pred <- predict(breast_cancer.tree, breast_cancer.test, type = "class")

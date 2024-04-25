@@ -29,14 +29,14 @@ library(randomForest)
 ```{r}
 set.seed(2)
 
-train <- sample(nrow(data), nrow(data)/2)
+train <- sample(nrow(data), nrow(data) / 2)
 
-rf <- randomForest(alcohol~., ntree = 50, data = data, subset = train)
+rf <- randomForest(alcohol ~ ., ntree = 50, data = data, subset = train)
 
-pred <- predict(rf, data[-train, ])
+pred <- predict(rf, data[-train,])
 
 mse <- mean((data$alcohol - pred)^2)
-mrae <- mean(abs((data$alcohol - pred)/data$alcohol))
+mrae <- mean(abs((data$alcohol - pred) / data$alcohol))
 
 print(mse)
 print(mrae)
@@ -46,14 +46,14 @@ print(mrae)
 ```{r}
 set.seed(2)
 
-train <- sample(nrow(data), nrow(data)/2)
+train <- sample(nrow(data), nrow(data) / 2)
 
-rf <- randomForest(quality~., ntree = 500, data = data, subset = train)
+rf <- randomForest(quality ~ ., ntree = 500, data = data, subset = train)
 
-pred <- predict(rf, data[-train, ])
+pred <- predict(rf, data[-train,])
 
 mse <- mean((data$quality - pred)^2)
-mrae <- mean(abs((data$quality - pred)/data$quality))
+mrae <- mean(abs((data$quality - pred) / data$quality))
 
 print(mse)
 print(mrae)

@@ -17,7 +17,7 @@ breast_cancer.test.diagnosis <- breast_cancer.test[, "diagnosis"]
 # Creating the decision tree model
 breast_cancer.tree <- tree(diagnosis ~ ., breast_cancer, subset = breast_cancer.train)
 
-breast_cancer.treeFancy <- rpart(diagnosis ~ ., breast_cancer, subset=breast_cancer.train)
+breast_cancer.treeFancy <- rpart(diagnosis ~ ., breast_cancer, subset = breast_cancer.train)
 
 # Predicting diagnosis for the test set
 tree.pred <- predict(breast_cancer.tree, breast_cancer.test, type = "class")

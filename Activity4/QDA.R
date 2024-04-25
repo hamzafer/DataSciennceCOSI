@@ -8,7 +8,10 @@ set.seed(2)
 train <- sample(seq_len(nrow(iris)), size = 0.75 * nrow(iris), replace = FALSE)
 
 # Repeat the process using QDA
-qda.model <- qda(Species ~ Sepal.Length + Sepal.Width + Petal.Length + Petal.Width, data = iris, subset = train)
+qda.model <- qda(Species ~ Sepal.Length +
+  Sepal.Width +
+  Petal.Length +
+  Petal.Width, data = iris, subset = train)
 
 qda.model
 

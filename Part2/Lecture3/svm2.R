@@ -10,9 +10,9 @@ data(Pima.te)
 
 set.seed(1)
 
-svmfit <- svm(type ~ ., data=Pima.tr, kernel="linear", cost=10, scale=FALSE)
+svmfit <- svm(type ~ ., data = Pima.tr, kernel = "linear", cost = 10, scale = FALSE)
 
-svmfit.predict <- predict(svmfit, Pima.te, type="class")
-table(svmfit.predict, truth=Pima.te$type)
+svmfit.predict <- predict(svmfit, Pima.te, type = "class")
+table(svmfit.predict, truth = Pima.te$type)
 mean(svmfit.predict == Pima.te$type)
 confusionMatrix(data = svmfit.predict, reference = Pima.te$type)

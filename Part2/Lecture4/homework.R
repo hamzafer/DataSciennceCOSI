@@ -40,4 +40,4 @@ predictions <- predict(svm_model, newdata = data)
 correct_predictions <- sum(predictions == data$class)
 total_predictions <- nrow(data)
 accuracy <- correct_predictions / total_predictions
-cat("\nAccuracy:", accuracy*100, "%")
+cat("\nAccuracy:", accuracy * 100, "%")

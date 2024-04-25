@@ -8,7 +8,10 @@ set.seed(2)
 train <- sample(seq_len(nrow(iris)), size = 0.75 * nrow(iris), replace = FALSE)
 
 # Apply Linear Discriminant Analysis to the iris data set to obtain the Species.
-lda.model <- lda(Species ~ Sepal.Length + Sepal.Width + Petal.Length + Petal.Width, data = iris, subset = train)
+lda.model <- lda(Species ~ Sepal.Length +
+  Sepal.Width +
+  Petal.Length +
+  Petal.Width, data = iris, subset = train)
 
 lda.model
 

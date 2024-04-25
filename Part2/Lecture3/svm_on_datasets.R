@@ -15,8 +15,8 @@ svmfit <- tune(svm, diagnosis ~ ., data = breast_cancer, kernel = "linear", type
 summary(svmfit)
 bestmod <- svmfit$best.model
 
-svmfit.predict <- predict(bestmod, breast_cancer, type="class")
-table(svmfit.predict, truth=breast_cancer$diagnosis)
+svmfit.predict <- predict(bestmod, breast_cancer, type = "class")
+table(svmfit.predict, truth = breast_cancer$diagnosis)
 mean(svmfit.predict == breast_cancer$diagnosis)
 confusionMatrix(data = svmfit.predict, reference = breast_cancer$diagnosis)
 

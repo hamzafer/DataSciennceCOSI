@@ -1,10 +1,13 @@
 # Data Science Course Repository
 
-Welcome to the Data Science Course Repository! This repository contains the materials, assignments, lectures, and activities used throughout the course.
+Welcome to the Data Science Course Repository! This repository contains the materials, assignments, lectures, and
+activities used throughout the course.
 
 ## Overview
 
-This course is designed to provide a comprehensive introduction to the fundamental concepts and techniques in data science. Through a series of lectures, activities, and assignments, students will learn to collect, analyze, and interpret large datasets.
+This course is designed to provide a comprehensive introduction to the fundamental concepts and techniques in data
+science. Through a series of lectures, activities, and assignments, students will learn to collect, analyze, and
+interpret large datasets.
 
 ## Contents
 
@@ -26,7 +29,6 @@ Once cloned, you can navigate to each folder to view the course materials:
 - `Assignment[1-3]`: Instructions and templates for course assignments.
 - `Lecture[1-5]`: Slides and notes from the course lectures.
 - And ongoing...
-
 
 ## Contact
 

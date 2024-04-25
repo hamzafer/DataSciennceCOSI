@@ -34,8 +34,8 @@ accuracy <- calculate_accuracy(svmfit, dat)
 print(accuracy)
 
 # e1071 automatic tuning
-tune.out <- tune(svm, y ~ ., data = dat, kernel = "linear", ranges=
-                 list(cost=c(0.001, 0.01, 0.1, 1, 5, 10, 100)))
+tune.out <- tune(svm, y ~ ., data = dat, kernel = "linear", ranges =
+  list(cost = c(0.001, 0.01, 0.1, 1, 5, 10, 100)))
 bestmod <- tune.out$best.model
 summary(bestmod)
 
@@ -43,9 +43,9 @@ accuracy <- calculate_accuracy(bestmod, dat)
 print(accuracy)
 
 # Evaluate on test set
-xtest <- matrix(rnorm(20*2), ncol=2)
-ytest <- sample(c(-1, 1), 20, rep=TRUE)
-xtest[ytest==1,] <- xtest[ytest==1,] + 1
+xtest <- matrix(rnorm(20 * 2), ncol = 2)
+ytest <- sample(c(-1, 1), 20, rep = TRUE)
+xtest[ytest == 1,] <- xtest[ytest == 1,] + 1
 testdat <- data.frame(x = xtest, y = as.factor(ytest))
 
 # Predictions with the best model

@@ -23,8 +23,21 @@ model2 <- lm(area ~ peri + shape + perm, data) # Additive Linear Regression
 model3 <- lm(area ~ peri * shape * perm, data) # Non Additive Linear Regression
 model4 <- lm(area ~ peri + I(peri^2), data) # Polynomial Regression
 model5 <- lm(area ~ ., data)
-model6 <- lm(area ~ peri  + I(peri^2) + shape + I(shape^2)+ perm+ I(perm^2), data)
-model7 <- lm(area ~ peri  + I(peri^2) + shape + I(shape^2)+ perm+ I(perm^2) + I(peri^3) + I(shape^3) + I(perm^3), data)
+model6 <- lm(area ~ peri +
+  I(peri^2) +
+  shape +
+  I(shape^2) +
+  perm +
+  I(perm^2), data)
+model7 <- lm(area ~ peri +
+  I(peri^2) +
+  shape +
+  I(shape^2) +
+  perm +
+  I(perm^2) +
+  I(peri^3) +
+  I(shape^3) +
+  I(perm^3), data)
 
 cat("Mean Squared Error one variable", mean((predict(model) - data$area)^2), "\n")
 cat("Mean Squared Error two variables", mean((predict(model2) - data$area)^2), "\n")

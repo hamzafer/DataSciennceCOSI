@@ -15,11 +15,11 @@ missing_values <- any(is.na(data_frame))
 library(e1071)
 library(caret)
 set.seed(12)
-train_idx <- sample(1:nrow(data_frame),0.5*nrow(data_frame))
-training_data <- data_frame[train_idx, ]
-testing_data <- data_frame[-train_idx, ]
+train_idx <- sample(1:nrow(data_frame), 0.5 * nrow(data_frame))
+training_data <- data_frame[train_idx,]
+testing_data <- data_frame[-train_idx,]
 
-svm_model <- svm(alcohol ~ ., data = training_data, kernel ="radial", gamma=3, cost=1)
+svm_model <- svm(alcohol ~ ., data = training_data, kernel = "radial", gamma = 3, cost = 1)
 predictions <- predict(svm_model, newdata = testing_data)
 
 mse <- mean((testing_data$alcohol - predictions)^2)

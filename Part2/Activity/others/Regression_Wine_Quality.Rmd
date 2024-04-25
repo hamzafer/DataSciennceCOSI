@@ -47,7 +47,7 @@ table(data$alcohol)
 
 ```{r}
 # Remove duplicated rows if any
-data <- data[!duplicated(data), ]
+data <- data[!duplicated(data),]
 
 # Handling missing values - assuming minimal missing values, else consider imputation or removal
 data <- na.omit(data)
@@ -57,7 +57,7 @@ data <- na.omit(data)
 
 ```{r}
 set.seed(2)
-train_indices <- sample(nrow(data), nrow(data)/2)
+train_indices <- sample(nrow(data), nrow(data) / 2)
 train <- data[train_indices,]
 test <- data[-train_indices,]
 ```
@@ -66,7 +66,7 @@ test <- data[-train_indices,]
 
 ```{r}
 # Fit a decision tree model to predict 'quality' based on all other variables
-tree_model <- tree(alcohol ~ ., data = train) 
+tree_model <- tree(alcohol ~ ., data = train)
 
 # Plot the pruned tree
 plot(tree_model)
@@ -87,7 +87,7 @@ tree_predictions <- predict(smodel, test)
 
 # Calculate RMSE
 tree_rmse <- sqrt(mean((tree_predictions - test$alcohol)^2))
-tree_mrae <- mean(abs((test$alcohol - tree_predictions)/test$alcohol))
+tree_mrae <- mean(abs((test$alcohol - tree_predictions) / test$alcohol))
 print(paste("Decision Tree RMSE:", tree_rmse))
 print(paste("Decision Tree MRAE:", tree_mrae))
 ```

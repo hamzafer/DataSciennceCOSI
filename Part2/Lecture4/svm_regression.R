@@ -9,16 +9,16 @@ data(Boston)
 data(Boston)
 
 # Create a training set
-train <- sample(1:nrow(Boston), nrow(Boston)/2)
+train <- sample(1:nrow(Boston), nrow(Boston) / 2)
 
 # Train the SVM model with a linear kernel
-svmfit <- svm(medv ~ ., data=Boston[train,], kernel="linear", cost=10)
+svmfit <- svm(medv ~ ., data = Boston[train,], kernel = "linear", cost = 10)
 
 # Summarize the model
 summary(svmfit)
 
 # Predict using the SVM model on the test set
-svmfit.predict <- predict(svmfit, newdata=Boston[-train,])
+svmfit.predict <- predict(svmfit, newdata = Boston[-train,])
 
 # Calculate and print the Root Mean Squared Error (RMSE)
 rmse <- sqrt(mean((Boston[-train, "medv"] - svmfit.predict)^2))
