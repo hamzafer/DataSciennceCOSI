@@ -1,8 +1,10 @@
 # Notes:
 # Aritificial regression, where we pretend one variable as a target variable and the rest as features
 # Clustering...?
+# difference reinforcement learning and unsupervised learning and semi-supervised learning
 
 # Load the RSNNs library to use functions for neural networks
+library(Rcpp)
 library(RSNNS)
 set.seed(123)
 
