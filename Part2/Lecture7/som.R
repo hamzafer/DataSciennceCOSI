@@ -1,3 +1,7 @@
+# Notes:
+# Aritificial regression, where we pretend one variable as a target variable and the rest as features
+# Clustering...?
+
 # Load the RSNNs library to use functions for neural networks
 library(RSNNS)
 set.seed(123)
