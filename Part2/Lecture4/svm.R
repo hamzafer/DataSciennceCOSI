@@ -42,6 +42,7 @@ tune.out <- tune(svm, y ~ ., data = dat[train,], kernel = "radial",
 
 summary(tune.out)
 summary(tune.out$best.model)
+plot(tune.out$best.model, dat[train,])
 
 table(true = dat[-train, "y"], pred = predict(tune.out$best.model, newdata = dat[-train,]))
 

@@ -89,6 +89,7 @@ abline(0, 1)
 mean((yhat.bag - boston.test)^2)
 
 bag.boston <- randomForest(medv ~ ., data = Boston, subset = train, mtry = 13, ntree = 25)
+bag.boston
 
 # page 22
 
@@ -120,14 +121,3 @@ boost.boston <- gbm(medv ~ ., data = Boston[train,], distribution = "gaussian", 
 yhat.boost <- predict(boost.boston, newdata = Boston[-train,], n.trees = 5000)
 mean((yhat.boost - boston.test)^2)
 summary(boost.boston)
-
-# page 25
-
-boost.boston <- gbm(medv ~ ., data = Boston[train,],
-                    distribution = "gaussian", n.trees = 5000, interaction.depth = 4,
-                    shrinkage = 0.2, verbose = F)
-yhat.boost <- predict(boost.boston, newdata = Boston[-train,],
-                      n.trees = 5000)
-mean((yhat.boost - boston.test)^2)
-summary(boost.boston)
-

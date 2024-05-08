@@ -6,6 +6,12 @@ library(tree)
 # Build a decision tree model
 tree.model <- tree(price ~ ., data = kchousing)
 
+# Plot the simplified model
+plot(tree.model)
+
+# Add text labels to the plot
+text(tree.model)
+
 # Simplify the tree by pruning, best=number of nodes
 smodel <- prune.tree(tree.model, best = 3)
 

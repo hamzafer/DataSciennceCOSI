@@ -1,6 +1,6 @@
 library(e1071)
 set.seed(1)
-cat("\n***** new line", svmfit$index)
+
 # Create a random dataset
 x <- matrix(rnorm(20 * 2), ncol = 2)
 y <- c(rep(-1, 10), rep(1, 10))
@@ -38,6 +38,8 @@ tune.out <- tune(svm, y ~ ., data = dat, kernel = "linear", ranges =
   list(cost = c(0.001, 0.01, 0.1, 1, 5, 10, 100)))
 bestmod <- tune.out$best.model
 summary(bestmod)
+
+plot(bestmod, dat)
 
 accuracy <- calculate_accuracy(bestmod, dat)
 print(accuracy)
