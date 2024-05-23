@@ -1,0 +1,651 @@
+---
+title: "Data Science Practical Assignment"
+author: "Muhammad Hamza Zafar"
+date: "`r Sys.Date()`"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(gridExtra)
+library(caret)
+library(forcats)
+library(corrplot)
+options(warn=-1)
+```
+
+## Initial Data Loading
+
+```{r load-data}
+df <- read.csv(file = '/Users/stan/PycharmProjects/DataSciennceCOSI/dataset.csv')
+```
+
+## Display Data
+
+```{r display-data}
+print(head(df))
+```
+
+## Descriptive Statistics
+
+```{r descriptive-stats}
+summary(df)
+```
+
+## Information on Data Types
+
+```{r data-types}
+str(df)
+```
+
+## Check for Missing Values
+
+```{r check-missing}
+colSums(is.na(df))
+```
+
+## Count Unique Values in Each Column
+
+```{r unique-values}
+df %>% summarise_all(~n_distinct(.))
+```
+
+### Distribution Plots for Each Variable
+
+```{r distribution-plots}
+plot_list <- lapply(names(df), function(col) {
+  if (is.numeric(df[[col]])) {
+    return(ggplot(df, aes(x = .data[[col]])) +
+           geom_histogram(bins = 30, fill = "blue", color = "black") +
+           theme_minimal() +
+           ggtitle(paste("Distribution of", col)))
+  } else {
+    return(ggplot(df, aes(x = .data[[col]], fill = .data[[col]])) +
+           geom_bar() +
+           theme_minimal() +
+           ggtitle(paste("Distribution of", col)))
+  }
+})
+grid.arrange(grobs = plot_list, ncol = 2)
+
+```
+
+### Box Plots Grouped by Target
+
+```{r box-plots}
+boxplot_list <- lapply(names(df), function(col) {
+  ggplot(df, aes_string(x="Target", y=col)) + 
+    geom_boxplot() +
+    theme_minimal() +
+    ggtitle(paste("Boxplot of", col, "by Target"))
+})
+grid.arrange(grobs = boxplot_list, ncol = 2)
+```
+
+### Filter Data and Label Encode Target Variable
+
+```{r filter-label-encode}
+df <- df %>% filter(Target != "Enrolled")
+df$Target <- factor(df$Target)
+levels(df$Target) <- 0:(length(levels(df$Target)) - 1)
+table(df$Target)
+```
+
+### Correlation Matrix Before Feature Removal
+
+```{r correlation-before}
+correlation_matrix <- cor(df %>% select_if(is.numeric))
+corrplot(correlation_matrix, method = "color", type = "upper", tl.cex = 0.8)
+```
+
+```{r}
+colnames(df)
+
+```
+
+### Remove Highly Correlated or Less Relevant Features
+
+```{r feature-removal}
+df <- df %>%
+  select(-c(`International`, `Nacionality`, `Father.s.qualification`, 
+            `Curricular.units.1st.sem..credited.`, 
+            `Curricular.units.1st.sem..enrolled.`, 
+            `Curricular.units.1st.sem..approved.`, 
+            `Course`, `Educational.special.needs`, `Unemployment.rate`, `Inflation.rate`))
+
+```
+
+### Correlation Matrix After Feature Removal
+
+```{r correlation-after}
+correlation_matrix <- cor(df %>% select_if(is.numeric))
+corrplot(correlation_matrix, method = "color", type = "upper", tl.cex = 0.8)
+```
+
+#### After removing the unrelated columns our data frame looks like.
+
+```{r}
+colnames(df)
+```
+
+### **Train-Test Split and Feature Scaling**
+
+In R, we'll use the `caret` package for the train-test split, which provides a nice interface for creating training and test datasets with stratification. For feature scaling, we'll use `caret`'s `preProcess` function, which is quite versatile.
+
+```{r setup-modeling, include=FALSE}
+library(caret)
+library(randomForest)
+set.seed(123)
+```
+
+```{r train-test-split-scaling}
+# Splitting the data
+split <- createDataPartition(y = df$Target, p = 0.7, list = FALSE)
+train <- df[split, ]
+test <- df[-split, ]
+
+# Scaling features
+pre_proc_val <- preProcess(train[-ncol(train)], method = c("center", "scale"))
+train_scaled <- predict(pre_proc_val, train)
+test_scaled <- predict(pre_proc_val, test)
+
+# Preparing training and test sets
+X_train <- train_scaled[-ncol(train_scaled)]
+y_train <- train_scaled$Target
+X_test <- test_scaled[-ncol(test_scaled)]
+y_test <- test_scaled$Target
+```
+
+### **Random Forest and Hyperparameter Tuning**
+
+We will implement Random Forest using the `randomForest` package and tune it using `caret`'s `train` function, which simplifies hyperparameter tuning and cross-validation.
+
+```{r random-forest-model}
+train_data <- cbind(X_train, Target = y_train)
+
+mtry_values <- seq(2, sqrt(ncol(X_train)), by = 1)  # Assuming sqrt(n) as a start
+ntree_values <- c(50, 100, 150)  # Number of trees
+
+best_model <- NULL
+best_oob_error <- Inf
+results <- data.frame()
+
+for (mtry in mtry_values) {
+  for (ntree in ntree_values) {
+    set.seed(123)  # for reproducibility
+    rf_model <- randomForest(Target ~ ., data = train_data, mtry = mtry, ntree = ntree, importance = TRUE, do.trace = 100, keep.forest = TRUE)
+    
+    oob_error <- rf_model$err.rate[nrow(rf_model$err.rate), 1]
+    results <- rbind(results, data.frame(mtry, ntree, oob_error))
+    
+    if (oob_error < best_oob_error) {
+      best_oob_error <- oob_error
+      best_model <- rf_model
+    }
+  }
+}
+
+# Print the results of tuning
+print(results)
+```
+
+```{r}
+print(best_model)
+
+```
+
+### **Evaluation**
+
+Finally, evaluating the model's performance using common classification metrics and plotting a confusion matrix:
+
+```{r}
+# Plot variable importance for the best model
+varImpPlot(best_model)
+
+```
+
+```{r}
+# Calculate the confusion matrix
+predictions <- predict(best_model, X_test)
+
+conf_matrix <- confusionMatrix(as.factor(predictions), as.factor(y_test))
+
+# Print the confusion matrix table
+print(conf_matrix$table)
+
+# Printing detailed accuracy and other statistics
+print(conf_matrix)
+
+# Calculate precision and recall
+precision <- conf_matrix$byClass['Precision']
+recall <- conf_matrix$byClass['Recall']
+
+# Compute F1 Score
+f1_score <- 2 * (precision * recall) / (precision + recall)
+
+# Print the F1 Score
+print(paste("F1 Score:", f1_score))
+
+```
+
+## Logistic Regression
+
+```{r}
+# Ensure y_train and y_test are factors with the same levels
+all_levels <- c("0", "1")
+
+y_train <- factor(y_train, levels = all_levels)
+y_test <- factor(y_test, levels = all_levels)
+
+# Check the levels to ensure they are set correctly
+print(levels(y_train))
+print(levels(y_test))
+```
+
+```{r logistic-simple-model}
+# Fit the model
+logistic_model <- glm(Target ~ ., data = train, family = binomial())
+
+# Summarize the model
+summary(logistic_model)
+```
+
+### Making Predictions and Evaluating the Model
+
+```{r model-evaluation}
+# Predict on test data
+predictions <- predict(logistic_model, newdata = test, type = "response")
+predicted_classes <- ifelse(predictions > 0.5, 1, 0)
+
+# Convert predictions to factor with the same levels as y_test
+predicted_classes <- factor(predicted_classes, levels = levels(y_test))
+
+# Compute confusion matrix
+conf_matrix <- table(Predicted = predicted_classes, Actual = y_test)
+print(conf_matrix)
+
+# Calculate accuracy
+accuracy <- sum(diag(conf_matrix)) / sum(conf_matrix)
+print(paste("Accuracy:", accuracy))
+
+# Calculate precision, recall, and F1 score
+precision <- conf_matrix[2, 2] / sum(conf_matrix[2, ])
+recall <- conf_matrix[2, 2] / sum(conf_matrix[, 2])
+f1_score <- 2 * (precision * recall) / (precision + recall)
+
+print(paste("Precision:", precision))
+print(paste("Recall:", recall))
+print(paste("F1 Score:", f1_score))
+```
+
+## K-Nearest Neighbors (KNN) Model
+
+K-Nearest Neighbors (KNN) is a straightforward and widely used non-parametric method that classifies a data point based on how its neighbors are classified. This method assumes that similar things exist in close proximity, i.e., "birds of a feather flock together." In the context of student dropout prediction, this method can help identify patterns or clusters of students who may be at risk of dropping out based on similarities with previous students who dropped out.
+
+#### Preparing Data for KNN
+
+KNN requires scaled features because it uses distance calculations to determine the closeness of data points. Therefore, we will first scale our data:
+
+```{r knn-prep}
+library(caret)
+set.seed(123)  # for reproducibility
+
+# Scaling data
+pre_process <- preProcess(train[, -ncol(train)], method = c("center", "scale"))
+train_scaled <- predict(pre_process, train)
+test_scaled <- predict(pre_process, test)
+
+# Preparing training and test datasets
+X_train_knn <- train_scaled[, -ncol(train_scaled)]
+y_train_knn <- train_scaled$Target
+X_test_knn <- test_scaled[, -ncol(test_scaled)]
+y_test_knn <- test_scaled$Target
+```
+
+#### Training the KNN Model
+
+We will use the `caret` package to train our KNN model. We'll start with a default value of k (number of neighbors), and you can tune this parameter later if needed:
+
+```{r knn-model}
+# Setting up training control
+train_control_knn <- trainControl(method = "cv", number = 10)
+
+# Training the model
+knn_fit <- train(x = X_train_knn, y = y_train_knn, method = "knn", trControl = train_control_knn)
+
+# Output the training results
+print(knn_fit)
+```
+
+#### Evaluating the KNN Model
+
+After training the model, we'll predict on the test set and evaluate the performance:
+
+```{r knn-evaluate}
+# Predicting on test data
+knn_predictions <- predict(knn_fit, newdata = X_test_knn)
+
+# Confusion Matrix
+conf_matrix_knn <- confusionMatrix(knn_predictions, y_test_knn)
+print(conf_matrix_knn$table)
+
+# Additional Metrics
+accuracy_knn <- conf_matrix_knn$overall['Accuracy']
+precision_knn <- conf_matrix_knn$byClass['Precision']
+recall_knn <- conf_matrix_knn$byClass['Recall']
+f1_score_knn <- 2 * (precision_knn * recall_knn) / (precision_knn + recall_knn)
+
+# Print performance metrics
+print(paste("Accuracy:", accuracy_knn))
+print(paste("Precision:", precision_knn))
+print(paste("Recall:", recall_knn))
+print(paste("F1 Score:", f1_score_knn))
+```
+
+## Linear Discriminant Analysis (LDA)
+
+Linear Discriminant Analysis (LDA) is a classification method that attempts to find a linear combination of features which best separate two or more classes of objects or events. It is particularly useful for dimensionality reduction and is often used for pattern recognition in the fields of statistics, machine learning, and image processing. In the context of predicting student dropouts, LDA can help identify the linear boundaries among classes based on historical data.
+
+#### Training the LDA Model
+
+We will use the `MASS` package in R, which contains functions for performing linear and quadratic discriminant analysis.
+
+```{r lda-model}
+library(MASS)
+
+# Fit the model
+lda_fit <- lda(Target ~ ., data = as.data.frame(cbind(X_train_knn, Target = y_train_knn)))
+
+# Display model details
+print(lda_fit)
+```
+
+#### Evaluating the LDA Model
+
+After training the model, we'll use it to predict on the test set and evaluate the performance:
+
+```{r lda-evaluate}
+# Predicting on test data
+lda_predictions <- predict(lda_fit, newdata = as.data.frame(X_test_knn))
+predicted_classes_lda <- lda_predictions$class
+
+# Confusion Matrix
+conf_matrix_lda <- confusionMatrix(as.factor(predicted_classes_lda), as.factor(y_test_knn))
+print(conf_matrix_lda$table)
+
+# Additional Metrics
+accuracy_lda <- conf_matrix_lda$overall['Accuracy']
+precision_lda <- conf_matrix_lda$byClass['Precision']
+recall_lda <- conf_matrix_lda$byClass['Recall']
+f1_score_lda <- 2 * (precision_lda * recall_lda) / (precision_lda + recall_lda)
+
+# Print performance metrics
+print(paste("Accuracy:", accuracy_lda))
+print(paste("Precision:", precision_lda))
+print(paste("Recall:", recall_lda))
+print(paste("F1 Score:", f1_score_lda))
+```
+
+## Classification Trees
+
+Classification Trees are a non-parametric supervised learning method used for classifying data points. By breaking down our data set into smaller subsets while simultaneously developing an associated decision tree, the model helps in making predictions. These trees are easy to interpret and can handle both numerical and categorical data.
+
+#### Preparing Data for Classification Trees
+
+For Classification Trees, data does not necessarily need to be scaled. However, handling missing values and ensuring categorical variables are appropriately encoded is crucial.
+
+`{r tree-prep}ng values and handling them if any (simple example) train[is.na(train)] <- median(train, na.rm = TRUE) test[is.na(test)] <- median(test, na.rm = TRUE)`
+
+#### Training the Classification Tree Model
+
+We will use the `rpart` package to implement a classification tree.
+
+```{r tree-model}
+library(rpart)
+
+# Fit the model
+tree_fit <- rpart(Target ~ ., data = train, method = "class")
+
+# Print the model details
+printcp(tree_fit)  # Display the complexity parameter table
+```
+
+#### Visualizing the Tree
+
+Visualizing the tree can provide insights into the decision-making process of the model.
+
+```{r tree-plot}
+# Plotting the tree
+plot(tree_fit, uniform = TRUE, main = "Classification Tree")
+text(tree_fit, use.n = TRUE)
+```
+
+#### Evaluating the Classification Tree Model
+
+After training the model, we'll use it to predict on the test set and evaluate the performance:
+
+```{r tree-evaluate}
+# Predicting on test data
+tree_predictions <- predict(tree_fit, newdata = test, type = "class")
+
+# Confusion Matrix
+conf_matrix_tree <- confusionMatrix(tree_predictions, test$Target)
+print(conf_matrix_tree$table)
+
+# Additional Metrics
+accuracy_tree <- conf_matrix_tree$overall['Accuracy']
+precision_tree <- conf_matrix_tree$byClass['Precision']
+recall_tree <- conf_matrix_tree$byClass['Recall']
+f1_score_tree <- 2 * (precision_tree * recall_tree) / (precision_tree + recall_tree)
+
+# Print performance metrics
+print(paste("Accuracy:", accuracy_tree))
+print(paste("Precision:", precision_tree))
+print(paste("Recall:", recall_tree))
+print(paste("F1 Score:", f1_score_tree))
+
+```
+
+## Artificial Neural Networks (Multi-layer Perceptrons)
+
+Multi-layer Perceptrons (MLPs) are a type of feedforward artificial neural network that consist of at least three layers of nodes: an input layer, a hidden layer, and an output layer. MLPs use a backpropagation technique for training the network. MLPs are particularly useful for classification tasks where input data points are non-linearly separable.
+
+#### Setting Up Neural Network in R
+
+We'll use the `keras` package to define and train our neural network. Here's how you can set up an MLP similar to the configuration you've found to work best:
+
+```{r setup-ann}
+library(nnet)
+
+```
+
+#### Training the Model
+
+We will now train the model using the training data. Training neural networks typically requires a lot of computational resources, and the process can be time-consuming:
+
+```{r train-ann}
+# Convert factor to numeric since nnet requires numerical target for classification
+train$Target <- as.numeric(as.factor(train$Target)) - 1
+
+# Try different sizes of the neural network
+sizes <- c(1, 2, 3, 5, 10)
+results <- list()
+
+for (size in sizes) {
+  set.seed(123)  # for reproducibility
+  nn_model <- nnet(Target ~ ., data = train, size = size, linout = TRUE, skip = TRUE, maxit = 500)
+  # Storing models for further analysis
+  results[[paste("Size", size)]] <- nn_model
+}
+
+# You can then evaluate or compare these models based on your criteria
+# Example: Print the summary of each model
+lapply(results, summary)
+```
+
+#### Evaluating the Model
+
+After training, we evaluate the model's performance on the test set:
+
+```{r evaluate-ann}
+# Assuming your test data is also ready and preprocessed similar to the training data
+test$Target <- as.numeric(as.factor(test$Target)) - 1  # Ensure the target variable is numeric
+
+# Function to evaluate model
+evaluate_model <- function(model, data, true_labels) {
+  predictions <- predict(model, newdata = data, type = "raw")
+  predicted_classes <- ifelse(predictions > 0.5, 1, 0)  # Applying a threshold for binary classification
+  
+  # Compute confusion matrix
+  conf_matrix <- confusionMatrix(as.factor(predicted_classes), as.factor(true_labels))
+  
+  # Extracting metrics
+  accuracy <- conf_matrix$overall['Accuracy']
+  precision <- conf_matrix$byClass['Precision']
+  recall <- conf_matrix$byClass['Recall']
+  f1_score <- 2 * (precision * recall) / (precision + recall)
+  
+  # Return a list of metrics
+  list(
+    ConfusionMatrix = conf_matrix$table,
+    Accuracy = accuracy,
+    Precision = precision,
+    Recall = recall,
+    F1Score = f1_score
+  )
+}
+
+# Evaluate each model and store results
+evaluation_results <- lapply(results, function(model) {
+  evaluate_model(model, test[, -ncol(test)], test$Target)
+})
+
+# Print evaluation results
+evaluation_results
+```
+
+## Support Vector Machines (SVM)
+
+Support Vector Machines (SVM) are powerful machine learning models capable of performing linear or non-linear classification, regression, and even outlier detection. For classification, particularly binary classification, they are widely used and highly effective.
+
+#### Setting Up SVM in R
+
+```{r}
+if (!requireNamespace("e1071", quietly = TRUE))
+    install.packages("e1071")
+library(e1071)
+```
+
+#### Training SVM with Parameter Tuning
+
+We will explore different configurations using the provided `C`, `gamma`, and `kernel` parameters to find the best model:
+
+```{r}
+# Define ranges for the parameters
+tuning_grid <- expand.grid(C = c(0.1),
+                           gamma = c(1),
+                           kernel = c('linear'))
+
+# SVM model training with cross-validation for parameter tuning
+svm_tune_results <- tune(svm, train.x = Target ~ ., data = train,
+                         ranges = tuning_grid,
+                         scale = FALSE)
+
+# Print the best parameters
+print(svm_tune_results$best.parameters)
+```
+
+#### Evaluating the SVM Model
+
+After identifying the best parameters, train the SVM model using these parameters and evaluate its performance:
+
+```{r}
+# Train the model using the best parameters
+best_svm <- svm(Target ~ ., data = train, type = "C-classification",
+                kernel = svm_tune_results$best.parameters$kernel,
+                cost = svm_tune_results$best.parameters$C,
+                gamma = svm_tune_results$best.parameters$gamma)
+
+# Predict on the test set
+svm_predictions <- predict(best_svm, newdata = test)
+
+# Confusion Matrix and performance metrics
+conf_matrix_svm <- confusionMatrix(svm_predictions, as.factor(test$Target))
+
+# Print the confusion matrix
+print(conf_matrix_svm$table)
+
+# Additional Metrics
+accuracy_svm <- conf_matrix_svm$overall['Accuracy']
+precision_svm <- conf_matrix_svm$byClass['Precision']
+recall_svm <- conf_matrix_svm$byClass['Recall']
+f1_score_svm <- 2 * (precision_svm * recall_svm) / (precision_svm + recall_svm)
+
+# Print performance metrics
+print(paste("Accuracy:", accuracy_svm))
+print(paste("Precision:", precision_svm))
+print(paste("Recall:", recall_svm))
+print(paste("F1 Score:", f1_score_svm))
+```
+
+### Hierarchical Clustering
+
+Hierarchical clustering builds a tree of clusters and can be an insightful method for understanding the data structure in an unsupervised learning context. It doesn't require the number of clusters to be defined in advance and offers a detailed view of the data grouping at different levels of granularity.
+
+#### Preparing Data for Hierarchical Clustering
+
+First, ensure your data is appropriately preprocessed. Hierarchical clustering typically benefits from normalization or standardization, especially when variables are measured on different scales.
+
+```{r setup-hierarchical}
+library(stats)  # For dist and hclust
+
+# Assuming 'df' is your dataset and you have already preprocessed it (e.g., scaling)
+# Here we will perform scaling just for demonstration
+df_scaled <- scale(df[, -ncol(df)])  # Exclude target if it's supervised
+
+# Calculate the Euclidean distance matrix
+dist_matrix <- dist(df_scaled, method = "euclidean")
+```
+
+#### Performing Hierarchical Clustering
+
+Using Ward's method, which minimizes the total within-cluster variance, we can perform the hierarchical clustering:
+
+```{r hierarchical-clustering}
+# Perform hierarchical clustering using Ward's method
+hc <- hclust(dist_matrix, method = "ward.D2")
+
+# Plot the dendrogram to visualize the clustering
+plot(hc, main = "Hierarchical Clustering Dendrogram", xlab = "", sub = "")
+```
+
+#### Determining the Number of Clusters
+
+To cut the dendrogram at a meaningful level and to decide on the number of clusters, you can use visual inspection or statistical criteria:
+
+```{r cut-dendrogram}
+# Assuming you decide to cut the dendrogram to create k clusters
+k <- 3
+clusters <- cutree(hc, k = k)
+
+# Add cluster assignments back to the data
+df$Cluster <- as.factor(clusters)
+```
+
+#### Evaluating Clusters
+
+After clustering, evaluate the clusters to understand their characteristics and differences. Silhouette width is a common measure for assessing the quality of a clustering:
+
+```{r evaluate-clusters}
+library(cluster)  # For silhouette
+
+# Silhouette analysis
+sil_width <- silhouette(clusters, dist_matrix)
+plot(sil_width, col = 1:k, border = NA, main = "Silhouette Plot for Hierarchical Clustering")
+avg_sil_width <- mean(sil_width[, "sil_width"])
+print(paste("Average silhouette width:", avg_sil_width))
+```
