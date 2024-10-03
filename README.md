@@ -1,37 +1,35 @@
-# Data Science Course Repository
+# Student Performance Prediction
 
-Welcome to the Data Science Course Repository! This repository contains the materials, assignments, lectures, and
-activities used throughout the course.
+## Objective
+This project focuses on building predictive models to forecast student success or risk of dropout based on academic trajectory, demographics, and socio-economic factors. The dataset consists of 3,500 instances with 36 attributes, covering various student attributes such as marital status, admission grades, and parental occupation, among others.
 
-## Overview
+## Problem Statement
+The objective is to develop a machine learning model to predict student outcomes using several techniques learned throughout the Data Science course, including:
+- KNN
+- Linear Discriminant Analysis
+- Logistic Regression
+- Random Forests
+- Support Vector Machines
+- Neural Networks
 
-This course is designed to provide a comprehensive introduction to the fundamental concepts and techniques in data
-science. Through a series of lectures, activities, and assignments, students will learn to collect, analyze, and
-interpret large datasets.
+The dataset includes the following attributes:
+- Marital status, application mode, academic course, admission grades, parental occupation, educational special needs, tuition status, and various curricular unit performance indicators, along with economic indicators like unemployment and inflation rates.
 
-## Contents
+## Methodology
+The following tasks were carried out:
+1. Data preprocessing and cleaning.
+2. Exploratory data analysis (EDA).
+3. Model selection and evaluation using various machine learning techniques.
+4. Evaluation of model accuracy, complexity, and performance metrics such as F1 score, accuracy, and AUC.
+5. Justification of the final selected model based on both accuracy and complexity.
 
-- **Activities**: Interactive sessions that complement the lectures with hands-on exercises.
-- **Assignments**: Homework tasks designed to reinforce the concepts covered in lectures and activities.
-- **Lectures**: Theoretical background and introductions to the topics covered in the course.
+## Key Features
+- **Algorithms Implemented**: KNN, Logistic Regression, SVM, Random Forest, and Neural Networks.
+- **Tools Used**: R, Python, and associated data analysis libraries.
+- **Deliverables**: Report (PDF) and R script containing the final models.
 
-## Getting Started
+## Conclusion
+The final model successfully predicts student performance, with a focus on balancing model accuracy and interpretability. The report includes a detailed comparison of the different models applied, with justifications for the final selection.
 
-To get started with the course, clone this repository using Git:
-
-```
-git clone https://github.com/yourusername/DataScienceCOSI.git
-```
-
-Once cloned, you can navigate to each folder to view the course materials:
-
-- `Activity[1-8]`: Each folder contains materials for the course activities.
-- `Assignment[1-3]`: Instructions and templates for course assignments.
-- `Lecture[1-5]`: Slides and notes from the course lectures.
-- And ongoing...
-
-## Contact
-
-If you have any questions, please reach out to me at [hamzafar](https://www.hamzafar.me/).
-
-Thank you!
+## Extra Work
+Additional techniques and improvements were explored, such as boosting and unsupervised methods, using advanced techniques for improved predictive accuracy.
