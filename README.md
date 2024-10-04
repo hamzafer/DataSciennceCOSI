@@ -26,7 +26,6 @@ The following tasks were carried out:
 ## Key Features
 - **Algorithms Implemented**: KNN, Logistic Regression, SVM, Random Forest, and Neural Networks.
 - **Tools Used**: R, Python, and associated data analysis libraries.
-- **Deliverables**: Report (PDF) and R script containing the final models.
 
 ## Conclusion
 The final model successfully predicts student performance, with a focus on balancing model accuracy and interpretability. The report includes a detailed comparison of the different models applied, with justifications for the final selection.
